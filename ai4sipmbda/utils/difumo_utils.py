@@ -94,7 +94,7 @@ def _project_one(img, Z_inv, mask):
 
 
 def project_to_difumo(img_tio, Z_inv, mask, n_jobs=1):
-    parallel = Parallel(n_jobs=n_jobs)
+    parallel = Parallel(n_jobs=n_jobs, verbose=100)
     projected_imgs = parallel(
         delayed(_project_one)(img, Z_inv, mask) for img in img_tio
     )
