@@ -144,7 +144,7 @@ def do_classif(
     #     )
     # )
 
-    def do_split(split, X, Y, f, model, subjects, n_jobs, checkpoint_base_name, i_split):
+    def do_split(split, data_paths, projected_X, Y, f, model, subjects, n_jobs, checkpoint_base_name, i_split):
         checkpoint_name = f"{checkpoint_base_name}_{i_split}.pkl"
         train, test = split
         train, test = subjects[train], subjects[test]
@@ -157,11 +157,9 @@ def do_classif(
         except KeyError:
             warning("NOT PASSING TRAIN LABELS DICTIONARY TO TEST SET")
             Y_test = preprocess_label(Y[test])
-        X_train = np.array(X)[train.values]
-        print(" >> creating test images")
-        img_tio_test = [tio.ScalarImage(path) for path in np.array(X)[test.values]]
-        print(" >> projecting test images onto DiFuMo")
-        X_test = project_to_difumo(img_tio_test, Z_inv, mask, n_jobs=n_jobs)
+        X_train = np.array(data_paths)[train.values]
+        print(" >> Loading test projected images")
+        X_test = projected_X[test.values]
         clf = AugmentedClassifier(model, f)
         print(" >> starting fit")
         clf.fit(X_train, Y_train)
@@ -174,6 +172,7 @@ def do_classif(
     scores = []
     models_dir = Path(models_dir)
     models_dir.mkdir(exist_ok=True)
+    projected_X = np.load('../hcp900_difumo_matrics/difumo_data.npy')
     for model, name in models:
         subjects = labels["subject"].unique()
         sf = ShuffleSplit(
@@ -183,7 +182,8 @@ def do_classif(
         scores_split = [
             do_split(
                 split=split,
-                X=images_path,
+                data_paths=images_path,
+                projected_X=projected_X,
                 Y=labels,
                 f=f,
                 model=model,
