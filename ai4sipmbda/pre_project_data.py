@@ -52,7 +52,7 @@ if __name__ == "__main__":
 
     img_tio_test = [tio.ScalarImage(path) for path in data["images"]]
     print(" --- PROJECTING --- ")
-    X_test = project_to_difumo(img_tio_test, Z_inv, mask, n_jobs=args.n_jobs)
+    X_test = project_to_difumo(img_tio_test, Z_inv, mask, n_jobs=args.njobs)
 
     print(" --- SAVING --- ")
     np.save(output_path, X_test)
